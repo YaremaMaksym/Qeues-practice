@@ -1,7 +1,7 @@
 package com.xsakon.user;
 
 
-import com.xsakon.exception.DuplicateResourseException;
+import com.xsakon.exception.DuplicateResourceException;
 import com.xsakon.exception.RecourceNotFoundException;
 import com.xsakon.exception.RequestValidationException;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,18 +30,18 @@ public class UserService {
                 ));
     }
 
-    public void addUser(UserRegistrationRequest userRegistrationRequest){
-        String email = userRegistrationRequest.email();
+    public void addUser(UserRegistrationRequest registrationRequest){
+        String email = registrationRequest.email();
         if(userDAO.existsUserWithEmail(email)){
-            throw new DuplicateResourseException(
+            throw new DuplicateResourceException(
                     "Email already taken"
             );
         }
 
         User user = new User(
-                userRegistrationRequest.name(),
-                userRegistrationRequest.email(),
-                userRegistrationRequest.age()
+                registrationRequest.name(),
+                registrationRequest.email(),
+                registrationRequest.age()
         );
 
         userDAO.insertUser(user);
@@ -59,9 +59,6 @@ public class UserService {
     }
 
     public void updateUserById(Integer id, UserUpdateRequest updateRequest){
-
-
-
         User user = getUserById(id);
 
         boolean changes = false;
@@ -81,7 +78,7 @@ public class UserService {
 
         if(updateRequest.email() != null && updateRequest.email().equals(user.getEmail())){
             if(userDAO.existsUserWithEmail(updateRequest.email())){
-                throw new DuplicateResourseException(
+                throw new DuplicateResourceException(
                         "email already taken"
                 );
             }

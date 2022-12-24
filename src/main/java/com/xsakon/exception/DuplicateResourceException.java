@@ -4,9 +4,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(code = HttpStatus.CONFLICT)
-public class DuplicateResourseException extends RuntimeException{
+public class DuplicateResourceException extends RuntimeException{
 
-    public DuplicateResourseException(String massage) {
+    public DuplicateResourceException(String massage) {
         super(massage);
     }
 }

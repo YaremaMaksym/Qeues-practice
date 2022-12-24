@@ -1,14 +1,43 @@
 package com.xsakon.user;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("api/users")
 public class UserController {
 
-    //можливо потрібно реалізувати DJ
-    //private final UserService userService;
+    private final UserService userService;
 
 
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping
+    public List<User> getUsers(){
+        return userService.getAllUsers();
+    }
+
+    @GetMapping("{userId}")
+    public User getUserById(@PathVariable("userId") Integer id){
+        return  userService.getUserById(id);
+    }
+
+    @PostMapping
+    public void registerUser(@RequestBody UserRegistrationRequest registrationRequest){
+        userService.addUser(registrationRequest);
+    }
+
+    @DeleteMapping("{userId}")
+    public void deleteUser(@PathVariable("userId") Integer id){
+        userService.deleteUserById(id);
+    }
+
+    @PutMapping({"userId"})
+    public void updateUser(@PathVariable("userId") Integer id,
+                           UserUpdateRequest updateRequest){
+        userService.updateUserById(id, updateRequest);
+    }
 }
