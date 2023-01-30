@@ -2,7 +2,7 @@ package com.xsakon.user;
 
 
 import com.xsakon.exception.DuplicateResourceException;
-import com.xsakon.exception.RecourceNotFoundException;
+import com.xsakon.exception.ResourceNotFoundException;
 import com.xsakon.exception.RequestValidationException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -18,14 +18,13 @@ public class UserService {
         this.userDAO = userDAO;
     }
 
-
     public List<User> getAllUsers(){
         return userDAO.selectAllUsers();
     }
 
     public User getUserById(Integer id){
         return userDAO.selectUserById(id)
-                .orElseThrow(() -> new RecourceNotFoundException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "user with id [%s] not found".formatted(id)
                 ));
     }
@@ -50,7 +49,7 @@ public class UserService {
 
     public void deleteUserById(Integer id){
         if(!userDAO.existsUserWithId(id)){
-            throw new RecourceNotFoundException(
+            throw new ResourceNotFoundException(
                     "user with id [%s] not found".formatted(id)
             );
         }
@@ -59,24 +58,24 @@ public class UserService {
     }
 
     public void updateUserById(Integer id, UserUpdateRequest updateRequest){
-        User user = getUserById(id);
+        User user = userDAO.selectUserById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "user with id [%s] not found".formatted(id)
+                ));
 
         boolean changes = false;
 
-
-        if(!userDAO.existsUserWithId(id)){
-            throw new RecourceNotFoundException(
-                    "user with id [%s] not found".formatted(id)
-            );
-        }
-
-        if(updateRequest.name() != null && updateRequest.name().equals(user.getName())){
+        if(updateRequest.name() != null && !updateRequest.name().equals(user.getName())){
             user.setName(updateRequest.name());
             changes = true;
         }
 
+        if(updateRequest.age() != null && !updateRequest.age().equals(user.getAge())){
+            user.setAge(updateRequest.age());
+            changes = true;
+        }
 
-        if(updateRequest.email() != null && updateRequest.email().equals(user.getEmail())){
+        if(updateRequest.email() != null && !updateRequest.email().equals(user.getEmail())){
             if(userDAO.existsUserWithEmail(updateRequest.email())){
                 throw new DuplicateResourceException(
                         "email already taken"

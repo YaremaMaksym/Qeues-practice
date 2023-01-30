@@ -4,9 +4,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(code = HttpStatus.NOT_FOUND)
-public class RecourceNotFoundException extends RuntimeException{
+public class ResourceNotFoundException extends RuntimeException{
 
-    public RecourceNotFoundException(String massage){
-        super(massage);
+    public ResourceNotFoundException(String message){
+        super(message);
     }
 }

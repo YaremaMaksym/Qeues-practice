@@ -45,8 +45,6 @@ public class UserJPADataAcessService implements UserDao {
         userRepository.deleteById(id);
     }
 
-
-
     @Override
     public void updateUser(User user){
         userRepository.save(user);
