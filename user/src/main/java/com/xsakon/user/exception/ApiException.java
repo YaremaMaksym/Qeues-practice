@@ -1,4 +1,4 @@
-package com.xsakon.exception;
+package com.xsakon.user.exception;
 
 import org.springframework.http.HttpStatus;
 

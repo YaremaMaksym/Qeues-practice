@@ -1,9 +1,9 @@
 package com.xsakon.user;
 
 
-import com.xsakon.exception.DuplicateResourceException;
-import com.xsakon.exception.ResourceNotFoundException;
-import com.xsakon.exception.RequestValidationException;
+import com.xsakon.user.exception.DuplicateResourceException;
+import com.xsakon.user.exception.RequestValidationException;
+import com.xsakon.user.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
