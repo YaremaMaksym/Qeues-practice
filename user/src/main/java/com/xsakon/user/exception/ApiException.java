@@ -8,12 +8,14 @@ public class ApiException {
     private final String message;
     private final HttpStatus httpStatus;
     private final ZonedDateTime timeStamp;
+    private final String path;
 
 
-    public ApiException(String message, HttpStatus httpStatus, ZonedDateTime timeStamp) {
+    public ApiException(String message, HttpStatus httpStatus, ZonedDateTime timeStamp, String path) {
         this.message = message;
         this.httpStatus = httpStatus;
         this.timeStamp = timeStamp;
+        this.path = path;
     }
 
     public String getMessage() {
@@ -26,5 +28,9 @@ public class ApiException {
 
     public ZonedDateTime getTimeStamp() {
         return timeStamp;
+    }
+
+    public String getPath() {
+        return path;
     }
 }
