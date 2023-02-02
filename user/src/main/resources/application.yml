@@ -2,6 +2,8 @@ server:
   port: 8090
 
 spring:
+  application:
+    name: user
   datasource:
     url: jdbc:postgresql://localhost:5332/user
     username: postgres
@@ -16,3 +18,12 @@ spring:
     show-sql: true
   main:
     web-application-type: SERVLET
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true
+
