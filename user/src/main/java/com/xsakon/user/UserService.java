@@ -1,22 +1,22 @@
 package com.xsakon.user;
 
 
+import com.xsakon.clients.notification.NotificationClient;
+import com.xsakon.clients.notification.NotificationRequest;
 import com.xsakon.user.exception.DuplicateResourceException;
 import com.xsakon.user.exception.RequestValidationException;
 import com.xsakon.user.exception.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class UserService {
 
     private final UserDao userDAO;
-
-    public UserService(@Qualifier("jpa") UserDao userDAO) {
-        this.userDAO = userDAO;
-    }
+    private final NotificationClient notificationClient;
 
     public List<User> getAllUsers(){
         return userDAO.selectAllUsers();
@@ -37,14 +37,21 @@ public class UserService {
             );
         }
 
-        User user = new User(
-                registrationRequest.name(),
-                registrationRequest.email(),
-                registrationRequest.age()
-        );
+        User user = User.builder()
+                .name(registrationRequest.name())
+                .email(registrationRequest.email())
+                .age(registrationRequest.age())
+                .build();
 
-        userDAO.insertUser(user);
+        userDAO.insertUserAndFlush(user);
 
+        notificationClient.sendNotification(
+                new NotificationRequest(
+                    user.getId(),
+                    user.getEmail(),
+                    String.format("Hello %s, welcome to Xsakon...",
+                            user.getName())
+        ));
     }
 
     public void deleteUserById(Integer id){

@@ -41,6 +41,11 @@ public class UserJPADataAcessService implements UserDao {
     }
 
     @Override
+    public void insertUserAndFlush(User user){
+        userRepository.saveAndFlush(user);
+    }
+
+    @Override
     public void deleteUserById(Integer id) {
         userRepository.deleteById(id);
     }
