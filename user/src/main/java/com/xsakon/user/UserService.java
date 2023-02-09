@@ -1,22 +1,43 @@
 package com.xsakon.user;
 
 
+import com.xsakon.amqp.RabbitMQMessageProducer;
 import com.xsakon.clients.notification.NotificationClient;
 import com.xsakon.clients.notification.NotificationRequest;
 import com.xsakon.user.exception.DuplicateResourceException;
 import com.xsakon.user.exception.RequestValidationException;
 import com.xsakon.user.exception.ResourceNotFoundException;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserDao userDAO;
     private final NotificationClient notificationClient;
+    private final RabbitMQMessageProducer rabbitMQMessageProducer;
+
+
+    @Value("${rabbitmq.exchanges.internal}")
+    private String internalExchange;
+
+    @Value("${rabbitmq.queues.notification}")
+    private String notificationQueue;
+
+    @Value("${rabbitmq.routing-keys.internal-notification}")
+    private String internalNotificationRoutingKey;
+
+    public void sendNotificationRequest(NotificationRequest notificationRequest) {
+        rabbitMQMessageProducer.publish(
+                notificationRequest,
+                internalExchange,
+                internalNotificationRoutingKey
+        );
+    }
 
     public List<User> getAllUsers(){
         return userDAO.selectAllUsers();
@@ -45,23 +66,32 @@ public class UserService {
 
         userDAO.insertUserAndFlush(user);
 
-        notificationClient.sendNotification(
-                new NotificationRequest(
-                    user.getId(),
-                    user.getEmail(),
-                    String.format("Hello %s, welcome to Xsakon...",
-                            user.getName())
-        ));
+        NotificationRequest notificationRequest = new NotificationRequest(
+                user.getId(),
+                user.getEmail(),
+                String.format("Hello %s, welcome to Xsakon...",
+                        user.getName())
+        );
+
+        sendNotificationRequest(notificationRequest);
     }
 
     public void deleteUserById(Integer id){
-        if(!userDAO.existsUserWithId(id)){
-            throw new ResourceNotFoundException(
-                    "user with id [%s] not found".formatted(id)
-            );
-        }
+        User user = userDAO.selectUserById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "user with id [%s] not found".formatted(id)
+                ));
 
         userDAO.deleteUserById(id);
+
+        NotificationRequest notificationRequest = new NotificationRequest(
+                user.getId(),
+                user.getEmail(),
+                String.format("Hello %s, your account was successfully deleted...",
+                        user.getName())
+        );
+
+        sendNotificationRequest(notificationRequest);
     }
 
     public void updateUserById(Integer id, UserUpdateRequest updateRequest){
@@ -95,7 +125,15 @@ public class UserService {
         if(!changes){
             throw new RequestValidationException("no data changes found");
         }
-
         userDAO.updateUser(user);
+
+        NotificationRequest notificationRequest = new NotificationRequest(
+                user.getId(),
+                user.getEmail(),
+                String.format("Hello %s, your data changes was successfully saved",
+                        user.getName())
+        );
+
+        sendNotificationRequest(notificationRequest);
     }
 }

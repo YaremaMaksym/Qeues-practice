@@ -1,4 +1,4 @@
-package com.xsakon.clients.notification;
+package com.xsakon.notification;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

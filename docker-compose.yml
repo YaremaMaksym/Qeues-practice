@@ -30,6 +30,12 @@ services:
       - postgres
     restart: unless-stopped
 
+  rabbitmq:
+    image: rabbitmq:3.11.7-management
+    container_name: rabbitmq4Queues-Practice
+    ports:
+      - "5672:5672"
+      - "15672:15672"
 
 networks:
   postgres:

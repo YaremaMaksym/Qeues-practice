@@ -18,7 +18,16 @@ spring:
     show-sql: true
   main:
     web-application-type: SERVLET
+  rabbitmq:
+    addresses: localhost:5672
 
+rabbitmq:
+  exchanges:
+    internal: internal.exchange
+  queues:
+    notification: notification.queue
+  routing-keys:
+    internal-notification: internal.notification.routing-key
 
 eureka:
   client:

@@ -1,5 +1,6 @@
-package com.xsakon.clients.notification;
+package com.xsakon.notification;
 
+import com.xsakon.clients.notification.NotificationRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
