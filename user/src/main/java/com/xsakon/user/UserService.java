@@ -1,14 +1,11 @@
 package com.xsakon.user;
 
 
-import com.xsakon.amqp.RabbitMQMessageProducer;
-import com.xsakon.clients.notification.NotificationClient;
-import com.xsakon.clients.notification.NotificationRequest;
+import com.xsakon.user.rabbitmq.UserRabbitMQMessageProducerImpl;
 import com.xsakon.user.exception.DuplicateResourceException;
 import com.xsakon.user.exception.RequestValidationException;
 import com.xsakon.user.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,26 +15,8 @@ import java.util.List;
 public class UserService {
 
     private final UserDao userDAO;
-    private final NotificationClient notificationClient;
-    private final RabbitMQMessageProducer rabbitMQMessageProducer;
+    private final UserRabbitMQMessageProducerImpl MessageProducer;
 
-
-    @Value("${rabbitmq.exchanges.internal}")
-    private String internalExchange;
-
-    @Value("${rabbitmq.queues.notification}")
-    private String notificationQueue;
-
-    @Value("${rabbitmq.routing-keys.internal-notification}")
-    private String internalNotificationRoutingKey;
-
-    public void sendNotificationRequest(NotificationRequest notificationRequest) {
-        rabbitMQMessageProducer.publish(
-                notificationRequest,
-                internalExchange,
-                internalNotificationRoutingKey
-        );
-    }
 
     public List<User> getAllUsers(){
         return userDAO.selectAllUsers();
@@ -66,14 +45,7 @@ public class UserService {
 
         userDAO.insertUserAndFlush(user);
 
-        NotificationRequest notificationRequest = new NotificationRequest(
-                user.getId(),
-                user.getEmail(),
-                String.format("Hello %s, welcome to Xsakon...",
-                        user.getName())
-        );
-
-        sendNotificationRequest(notificationRequest);
+        MessageProducer.publishUserCreated(user);
     }
 
     public void deleteUserById(Integer id){
@@ -84,14 +56,7 @@ public class UserService {
 
         userDAO.deleteUserById(id);
 
-        NotificationRequest notificationRequest = new NotificationRequest(
-                user.getId(),
-                user.getEmail(),
-                String.format("Hello %s, your account was successfully deleted...",
-                        user.getName())
-        );
-
-        sendNotificationRequest(notificationRequest);
+        MessageProducer.publishUserDeleted(user);
     }
 
     public void updateUserById(Integer id, UserUpdateRequest updateRequest){
@@ -127,13 +92,6 @@ public class UserService {
         }
         userDAO.updateUser(user);
 
-        NotificationRequest notificationRequest = new NotificationRequest(
-                user.getId(),
-                user.getEmail(),
-                String.format("Hello %s, your data changes was successfully saved",
-                        user.getName())
-        );
-
-        sendNotificationRequest(notificationRequest);
+        MessageProducer.publishUserUpdated(user);
     }
 }
